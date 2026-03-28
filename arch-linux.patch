@@ -1,0 +1,93 @@
+diff --git a/src/nob/find_llvm.c b/src/nob/find_llvm.c
+index dfbd5fe4..ca925357 100644
+--- a/src/nob/find_llvm.c
++++ b/src/nob/find_llvm.c
+@@ -110,7 +110,7 @@ void find_llvm(void) {
+ 	nob_log(NOB_INFO, "LLVM " STR(LLVM_REQUIRED) " include directory found: %s", LLVM_INCLUDE_DIR);
+ 
+ 	// libraries
+-	cmd_append(&cmd, llvm_config, "--link-static", "--libnames", "core", "support", "X86", "AArch64", "passes");
++	cmd_append(&cmd, llvm_config, "--libs", "core", "support", "X86", "AArch64", "passes");
+ 	if (!cmd_run_sync_read_and_reset(&cmd, &sb)) exit(1);
+ 	if (sb.count == 0) exit(1);
+ 	LLVM_LIBS = trim_and_dup(sb);
+diff --git a/src/nob/nob.c b/src/nob/nob.c
+index bc51307a..b3881f89 100644
+--- a/src/nob/nob.c
++++ b/src/nob/nob.c
+@@ -256,7 +256,7 @@ void blc(void) {
+ 		while (libs.count) {
+ 			String_View lib = nob_sv_chop_by_delim(&libs, ' ');
+ 			if (lib.count)
+-				cmd_append(&cmd, temp_sprintf("%s/" SV_Fmt, LLVM_LIB_DIR, SV_Arg(lib)));
++				cmd_append(&cmd, temp_sprintf(SV_Fmt, SV_Arg(lib)));
+ 		}
+ #ifdef __APPLE__
+ 		cmd_append(&cmd, LIBZ, LIBZSTD, LIBCURSES);
+@@ -324,27 +324,27 @@ void find_deps(void) {
+ 
+ #define LIB_PATH "/lib /usr/lib /usr/local/lib /lib64 /usr/lib64 /usr/lib/x86_64-linux-gnu"
+ 
+-	LIBZ = shell("find " LIB_PATH " -name \"libz.a\" -print -quit 2>/dev/null");
++	LIBZ = shell("find " LIB_PATH " -name \"libz.so*\" -print -quit 2>/dev/null");
+ 	if (!strok(LIBZ)) {
+-		nob_log(NOB_ERROR, "Unable to find 'libz.a' in non of following paths: '" LIB_PATH "'.");
++		nob_log(NOB_ERROR, "Unable to find 'libz.so*' in non of following paths: '" LIB_PATH "'.");
+ 		exit(1);
+ 	}
+ 	nob_log(NOB_INFO, "Using 'libz' '%s'.", LIBZ);
+ 
+-	LIBZSTD = shell("find " LIB_PATH " -name \"libzstd.a\" -print -quit 2>/dev/null");
++	LIBZSTD = shell("find " LIB_PATH " -name \"libzstd.so*\" -print -quit 2>/dev/null");
+ 	if (!strok(LIBZSTD)) {
+-		nob_log(NOB_ERROR, "Unable to find 'libzstd.a' in non of following paths: '" LIB_PATH "'.");
++		nob_log(NOB_ERROR, "Unable to find 'libzstd.so*' in non of following paths: '" LIB_PATH "'.");
+ 		exit(1);
+ 	}
+ 	nob_log(NOB_INFO, "Using 'libzstd' '%s'.", LIBZSTD);
+ 
+-	LIBTINFO = shell("find " LIB_PATH " -name \"libtinfo.a\" -print -quit 2>/dev/null");
++	LIBTINFO = shell("find " LIB_PATH " -name \"libtinfo.so*\" -print -quit 2>/dev/null");
+ 	if (!strok(LIBTINFO)) {
+-		nob_log(NOB_WARNING, "Unable to find 'libtinfo.a' in non of following paths: '" LIB_PATH "'. Try to use ncurses.");
++		nob_log(NOB_WARNING, "Unable to find 'libtinfo.so*' in non of following paths: '" LIB_PATH "'. Try to use ncurses.");
+ 
+-		LIBTINFO = shell("find " LIB_PATH " -name \"libncurses_g.a\" -print -quit 2>/dev/null");
++		LIBTINFO = shell("find " LIB_PATH " -name \"libncurses_g.so*\" -print -quit 2>/dev/null");
+ 		if (!strok(LIBTINFO)) {
+-			nob_log(NOB_ERROR, "Unable to find 'libncurses_g.a' in non of following paths: '" LIB_PATH "'.");
++			nob_log(NOB_ERROR, "Unable to find 'libncurses_g.so*' in non of following paths: '" LIB_PATH "'.");
+ 			exit(1);
+ 		}
+ 	}
+@@ -439,4 +439,4 @@ void db_add_entry(const char *file, Cmd cmd) {
+ 	sb_append_cstr(&db, "\"\n");
+ 	sb_append_cstr(&db, "}");
+ }
+-#endif
+\ No newline at end of file
++#endif
+diff --git a/src/tinycthread.h b/src/tinycthread.h
+index 73353cbc..4c67f508 100644
+--- a/src/tinycthread.h
++++ b/src/tinycthread.h
+@@ -474,8 +474,8 @@ typedef struct {
+ 	    0,             \
+ 	}
+ #else
+-#define once_flag      pthread_once_t
+-#define ONCE_FLAG_INIT PTHREAD_ONCE_INIT
++//#define once_flag      pthread_once_t
++//#define ONCE_FLAG_INIT PTHREAD_ONCE_INIT
+ #endif
+ 
+ /** Invoke a callback exactly once
+@@ -486,7 +486,7 @@ typedef struct {
+ #if defined(_TTHREAD_WIN32_)
+ void call_once(once_flag *flag, void (*func)(void));
+ #else
+-#define call_once(flag, func) pthread_once(flag, func)
++//#define call_once(flag, func) pthread_once(flag, func)
+ #endif
+ 
+ #ifdef __cplusplus
