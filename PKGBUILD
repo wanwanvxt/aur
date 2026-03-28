@@ -2,7 +2,7 @@
 
 pkgname=biscuit-lang
 pkgver=0.13.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Simple programming language created for fun'
 arch=('x86_64')
 url='https://biscuitlang.org/'
@@ -13,9 +13,6 @@ depends=(
     'glibc'
     'llvm18'
     'binutils'
-    'zlib'
-    'zstd'
-    'ncurses'
 )
 makedepends=(
     'git'
