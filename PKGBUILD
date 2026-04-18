@@ -3,7 +3,7 @@
 _pkgname=nirimod
 pkgname=nirimod-git
 pkgver=r22.ed97a06
-pkgrel=1
+pkgrel=2
 pkgdesc='A visual, interactive configuration interface for the niri Wayland compositor'
 arch=('any')
 url='https://github.com/srinivasr/nirimod'
@@ -40,17 +40,17 @@ sha256sums=(
 )
 
 pkgver() {
-    cd "$_pkgname"
+    cd "$srcdir/$_pkgname"
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 build() {
-    cd "$_pkgname"
+    cd "$srcdir/$_pkgname"
     python -m build --wheel --no-isolation
 }
 
 package() {
-    cd "$_pkgname"
+    cd "$srcdir/$_pkgname"
 
     python -m installer --destdir="$pkgdir" dist/*.whl
     install -Dm755 /dev/stdin "$pkgdir/usr/bin/nirimod" <<EOF
