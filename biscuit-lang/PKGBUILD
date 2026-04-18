@@ -2,7 +2,7 @@
 
 pkgname=biscuit-lang
 pkgver=0.13.0
-pkgrel=2
+pkgrel=3
 pkgdesc='Simple programming language created for fun'
 arch=('x86_64')
 url='https://biscuitlang.org/'
@@ -13,6 +13,7 @@ depends=(
     'glibc'
     'llvm18'
     'binutils'
+    'sh'
 )
 makedepends=(
     'git'
@@ -54,15 +55,14 @@ package() {
     cd "$srcdir/bl"
 
     # lib
-    mkdir -p "$pkgdir/usr/lib/$pkgname"
+    install -d "$pkgdir/usr/lib/$pkgname"
     cp -dr --no-preserve=ownership bin lib -t "$pkgdir/usr/lib/$pkgname/"
 
     # delete insecure RUNPATH
     find "$pkgdir/usr/lib/$pkgname" -type f -name "*.so*" -exec chrpath --delete {} \; 2>/dev/null || true
 
     # config
-    mkdir -p "$pkgdir/etc/$pkgname"
-    cat > "$pkgdir/etc/$pkgname/config.yaml" <<EOF
+    install -Dm644 /dev/stdin "$pkgdir/etc/$pkgname/config.yaml" <<EOF
 version: "$pkgver"
 lib_dir: "/usr/lib/$pkgname/lib/bl/api"
 x86_64-pc-linux-gnu:
@@ -74,15 +74,14 @@ x86_64-pc-linux-gnu:
 EOF
 
     # exe
-    mkdir -p "$pkgdir/usr/bin"
-    cat > "$pkgdir/usr/bin/blc" <<EOF
+    install -Dm755 /dev/stdin "$pkgdir/usr/bin/blc" <<EOF
 #!/bin/sh
 exec /usr/lib/$pkgname/bin/blc --override-config='/etc/$pkgname/config.yaml' "\$@"
 EOF
     chmod +x "$pkgdir/usr/bin/blc"
 
     # docs
-    mkdir -p "$pkgdir/usr/share/doc/$pkgname"
+    install -d "$pkgdir/usr/share/doc/$pkgname"
     cp -dr --no-preserve=ownership docs/side/* -t "$pkgdir/usr/share/doc/$pkgname/"
     install -Dm644 README.md CHANGELOG.txt -t "$pkgdir/usr/share/doc/$pkgname/"
 
@@ -90,7 +89,7 @@ EOF
     install -Dm644 LICENSE LEGAL -t "$pkgdir/usr/share/licenses/$pkgname/"
 
     # syntax hl
-    mkdir -p "$pkgdir/usr/share/vim/vimfiles"
+    install -d "$pkgdir/usr/share/vim/vimfiles"
     cp -dr --no-preserve=ownership syntax/vim/* -t "$pkgdir/usr/share/vim/vimfiles/"
     install -Dm644 syntax/emacs/*.el -t "$pkgdir/usr/share/emacs/site-lisp/"
 }
