@@ -1,7 +1,7 @@
 pkgbase = nirimod-git
 	pkgdesc = A visual, interactive configuration interface for the niri Wayland compositor
 	pkgver = r22.ed97a06
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/srinivasr/nirimod
 	arch = any
 	license = MIT

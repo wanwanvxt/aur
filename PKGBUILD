@@ -3,7 +3,7 @@
 _pkgname=nirimod
 pkgname=nirimod-git
 pkgver=r22.ed97a06
-pkgrel=2
+pkgrel=3
 pkgdesc='A visual, interactive configuration interface for the niri Wayland compositor'
 arch=('any')
 url='https://github.com/srinivasr/nirimod'
